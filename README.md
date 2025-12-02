@@ -2,6 +2,8 @@
 
 A bonding curve-based marketplace for digital twin shares built on BNB Smart Chain (BSC) and compatible with other EVM networks.
 
+Available on [twin.fun](https://twin.fun).
+
 ## Overview
 
 Twin.fun enables users to create, buy, and sell keys in digital twins using a bonding curve pricing mechanism. Each digital twin represents a unique entity (person, brand, or concept) with associated metadata and ownership and knowledge. Key prices increase as more keys are purchased, creating a dynamic market for digital twin keys.
