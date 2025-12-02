@@ -11,7 +11,7 @@ Twin.fun enables users to create, buy, and sell keys in digital twins using a bo
 ## Technology Stack
 
 **Blockchain:** BNB Smart Chain
-**Smart Contracts:** Solidity ^0.8.22  
+**Smart Contracts:** Solidity ^0.8.2
 **Development Framework:** Foundry  
 **Libraries:** OpenZeppelin Contracts (Upgradeable), Forge STD
 **Proxy Pattern:** UUPS (Universal Upgradeable Proxy Standard)
