@@ -2,7 +2,7 @@
 
 A bonding curve-based marketplace for digital twin shares built on BNB Smart Chain (BSC) and compatible with other EVM networks.
 
-Available on [twin.fun](https://twin.fun).
+Available on [twin.fun](https://twin.fun)
 
 ## Overview
 
