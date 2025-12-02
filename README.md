@@ -49,7 +49,6 @@ Twin.fun enables users to create, buy, and sell keys in digital twins using a bo
 ### Prerequisites
 
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
-- Node.js (for subgraph development)
 
 ### Setup
 
