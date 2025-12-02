@@ -70,8 +70,8 @@ make test-gas
 ### Deployment
 
 ```bash
-# Deploy to BSC Testnet
-make deploy-bsc-testnet
+# Deploy to BSC
+make deploy-bsc
 
 # Deploy to local node
 make deploy-local
