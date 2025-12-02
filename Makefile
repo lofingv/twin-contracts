@@ -11,22 +11,10 @@ help:
 	@echo "  make build           - Build contracts"
 	@echo "  make test            - Run tests"
 	@echo ""
-	@echo "Deployment:"
-	@echo "  make deploy-bsc     - Deploy to BSC Mainnet"
-	@echo "  make deploy-bsc-testnet - Deploy to BSC Testnet"
-	@echo "  make deploy-local    - Deploy to local node"
-	@echo ""
-	@echo "Upgrades:"
-	@echo "  make upgrade-bsc-testnet - Upgrade contract on BSC Testnet"
-	@echo "  make upgrade-local    - Upgrade contract on local node"
-	@echo ""
 	@echo "Interactions:"
 	@echo "  make buy-first       - Buy first share (subject only)"
 	@echo "  make check-price     - Check prices for shares"
 	@echo "  make check-balance   - Check share balance"
-	@echo ""
-	@echo "Verification:"
-	@echo "  make verify          - Verify contract on BSCScan"
 
 
 install:
@@ -42,29 +30,15 @@ test-gas:
 	forge test --gas-report
 
 
-deploy-bsc-testnet:
+deploy-bsc:
 	@forge script script/DigitalTwinSharesV1.s.sol:DeployDigitalTwinSharesV1Script \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		--private-key $(PRIVATE_KEY) \
 		--broadcast \
 		--with-gas-price 20000000000 \
 		--priority-gas-price 2000000000 \
 		-vvvv
 
-
-deploy-local:
-	forge script script/DigitalTwinSharesV1.s.sol:DeployDigitalTwinSharesV1Script \
-		--rpc-url http://0.0.0.0:8545 \
-		--private-key $(PRIVATE_KEY)  \
-		--broadcast \
-		-vvvv
-
-upgrade-local:
-	@forge script script/DigitalTwinSharesV1.s.sol:UpgradeDigitalTwinSharesV1Script \
-		--rpc-url http://0.0.0.0:8545 \
-		--private-key $(PRIVATE_KEY)  \
-		--broadcast \
-		-vvvv --force
 
 check-buy-price:
 	@echo "Enter subject address:"
@@ -73,7 +47,7 @@ check-buy-price:
 	read amount; \
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "getBuyPrice(bytes16,uint256)" $$subject $$amount \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		-vvvv
 
 check-sell-price:
@@ -83,7 +57,7 @@ check-sell-price:
 	read amount; \
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "getSellPrice(bytes16,uint256)" $$subject $$amount \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		-vvvv
 
 check-balance:
@@ -93,7 +67,7 @@ check-balance:
 	read holder; \
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "getBalance(bytes16,address)" $$subject $$holder \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		-v
 
 buy-shares:
@@ -103,7 +77,7 @@ buy-shares:
 	read amount; \
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "buyShares(bytes16,uint256)" $$subject $$amount \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		--private-key $(PRIVATE_KEY) \
 		--broadcast \
 		--with-gas-price 10000000000 \
@@ -117,7 +91,7 @@ sell-shares:
 	read amount; \
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "sellShares(bytes16,uint256)" $$subject $$amount \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		--private-key $(PRIVATE_KEY) \
 		--broadcast \
 		-vvvv
@@ -129,7 +103,7 @@ create-digital-twin:
 	read url; \
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "createDigitalTwin(bytes16,string)" $$subject $$url \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		--private-key $(PRIVATE_KEY) \
 		--broadcast \
 		--with-gas-price 10000000000 \
@@ -141,7 +115,7 @@ set-min-shares-to-create:
 	read amount; \
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "setMinSharesToCreate(uint256)" $$amount \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		--private-key $(PRIVATE_KEY) \
 		--broadcast \
 		-vvvv
@@ -153,7 +127,7 @@ set-token-uri:
 	read url; \
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "setTokenUri(bytes16,string)" $$subject $$url \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		--private-key $(PRIVATE_KEY) \
 		--broadcast \
 		--with-gas-price 10000000000 \
@@ -166,7 +140,7 @@ grant-claim-ownership-role:
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "grantClaimOwnershipRole(address)" $$newOwner \
 		--private-key $(PRIVATE_KEY) \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		--with-gas-price 10000000000 \
 		--priority-gas-price 10000000000 \
 		--broadcast \
@@ -177,7 +151,7 @@ revoke-claim-ownership-role:
 	read newOwner; \
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "revokeClaimOwnershipRole(address)" $$newOwner \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		--private-key $(PRIVATE_KEY) \
 		--with-gas-price 10000000000 \
 		--priority-gas-price 10000000000 \
@@ -191,24 +165,19 @@ claim-ownership-admin:
 	read newOwner; \
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "claimOwnershipAdmin(bytes16,address)" $$digitalTwinId $$newOwner \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		--private-key $(PRIVATE_KEY) \
 		--with-gas-price 10000000000 \
 		--priority-gas-price 10000000000 \
 		--broadcast \
 		-vvvv
 
-upload-and-set-uri:
-	@echo "enter folder name:"; \
-	read folder; \
-	./uploadmetadata.sh $$folder
-
 set-protocol-fee-percent:
 	@echo "Enter protocol fee percent:"; \
 	read amount; \
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "setProtocolFeePercent(uint256)" $$amount \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		--private-key $(PRIVATE_KEY) \
 		--broadcast \
 		-vvvv
@@ -218,7 +187,7 @@ set-subject-fee-percent:
 	read amount; \
 	forge script script/DigitalTwinSharesV1.s.sol:InteractDigitalTwinSharesV1 \
 		--sig "setSubjectFeePercent(uint256)" $$amount \
-		--rpc-url $(BSC_TESTNET_RPC_URL) \
+		--rpc-url $(BSC_RPC_URL) \
 		--private-key $(PRIVATE_KEY) \
 		--broadcast \
 		-vvvv
