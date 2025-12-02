@@ -24,8 +24,8 @@ Twin.fun enables users to create, buy, and sell keys in digital twins using a bo
 
 | Network | Core Contract | Notes |
 |---------|---------------|-------|
-| BNB Mainnet | `0x1e5a5c87513c3a11f763dbce15da60d912b953b3` | Proxy Contract |
-| BNB Mainnet | `0x6a898Da0d3B35213Bc07733f8a151F60d80F0dA5` | Implementation |
+| BSC Mainnet | `0x1e5a5c87513c3a11f763dbce15da60d912b953b3` | Proxy Contract |
+| BSC Mainnet | `0x6a898Da0d3B35213Bc07733f8a151F60d80F0dA5` | Implementation |
 
 ## Features
 
