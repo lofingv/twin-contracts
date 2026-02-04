@@ -3,11 +3,17 @@ src = "src"
 out = "out"
 libs = ["lib"]
 solc = "0.8.22"
-ffi = true
+
+# Security: Disabled FFI to prevent execution of arbitrary shell commands during testing.
+# Enable only if specific scripts require external shell integration.
+ffi = false
+
 ast = true
 build_info = true
 extra_output = ["storageLayout"]
 build_info_path = "out/build-info"
+
+# Security: Restrict filesystem permissions if full read-write access is not strictly required.
 fs_permissions = [{ access = "read-write", path = "./"}]
 
 remappings = [
@@ -17,10 +23,13 @@ remappings = [
 ]
 
 optimizer = true
-# The number of optimizer runs
-optimizer_runs = 500
-# Whether or not to use the Yul intermediate representation compilation pipeline
-via_ir = false
+# Increased optimizer runs to 10,000 to prioritize lower runtime gas costs for users.
+# While it increases deployment cost, it makes interactions (buy/sell) cheaper.
+optimizer_runs = 10000
+
+# Enabled via_ir (Yul intermediate representation) for better gas optimization 
+# and to avoid "Stack too deep" errors in complex contract logic.
+via_ir = true
 
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
