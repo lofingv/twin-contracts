@@ -131,12 +131,21 @@ contract DigitalTwinSharesV1 is
     //
     // Pricing functions
     //
+    /**
+     * @notice Calculates the price for a given supply and amount using the sum of squares formula.
+     * @dev Optimized with unchecked blocks to save gas on arithmetic operations.
+     */
     function getPrice(uint256 supply, uint256 amount) public pure virtual returns (uint256) {
-        uint256 sum1 = supply == 0 ? 0 : (supply - 1) * supply * (2 * (supply - 1) + 1) / 6;
-        uint256 sum2 = supply == 0 && amount == 1
-            ? 0
-            : (supply + amount - 1) * (supply + amount) * (2 * (supply + amount - 1) + 1) / 6;
-        uint256 summation = sum2 - sum1;
+        uint256 summation;
+        
+        unchecked {
+            uint256 sum1 = supply == 0 ? 0 : (supply - 1) * supply * (2 * (supply - 1) + 1) / 6;
+            uint256 sum2 = (supply == 0 && amount == 1)
+                ? 0
+                : (supply + amount - 1) * (supply + amount) * (2 * (supply + amount - 1) + 1) / 6;
+            
+            summation = sum2 - sum1;
+        }
 
         return summation * 1 ether / 50000000;
     }
