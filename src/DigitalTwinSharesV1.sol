@@ -56,6 +56,9 @@ contract DigitalTwinSharesV1 is
     mapping(bytes16 => address) public digitalTwinIdToOwner;
     mapping(bytes16 => bool) public digitalTwinExists;
 
+    // Mapping for accumulated subject fees to prevent DoS attacks
+    mapping(address => uint256) public claimableFees;
+
     // Custom modifiers
     modifier onlyDigitalTwinOwner(bytes16 digitalTwinId) {
         require(digitalTwinIdToOwner[digitalTwinId] == msg.sender, "Caller is not the owner of this digital twin");
@@ -200,10 +203,11 @@ contract DigitalTwinSharesV1 is
 
         emit Trade(msg.sender, digitalTwinId, true, amount, price, protocolFee, subjectFee, supply + amount);
 
-        // transfer fees
+        // transfer fees using pull-over-push for subject to avoid DoS
+        claimableFees[digitalTwinIdToOwner[digitalTwinId]] += subjectFee;
+        
         (bool success1,) = protocolFeeDestination.call{value: protocolFee}("");
-        (bool success2,) = digitalTwinIdToOwner[digitalTwinId].call{value: subjectFee}("");
-        require(success1 && success2, "Unable to send funds");
+        require(success1, "Unable to send protocol fees");
 
         // Refund any excess value sent
         uint256 excess = msg.value - totalCost;
@@ -231,11 +235,12 @@ contract DigitalTwinSharesV1 is
 
         emit Trade(msg.sender, digitalTwinId, false, amount, price, protocolFee, subjectFee, supply - amount);
 
-        // transfer funds
+        // transfer funds using pull-over-push for subject
+        claimableFees[digitalTwinIdToOwner[digitalTwinId]] += subjectFee;
+
         (bool success1,) = msg.sender.call{value: netPayout}("");
         (bool success2,) = protocolFeeDestination.call{value: protocolFee}("");
-        (bool success3,) = digitalTwinIdToOwner[digitalTwinId].call{value: subjectFee}("");
-        require(success1 && success2 && success3, "Unable to send funds");
+        require(success1 && success2, "Unable to send funds");
     }
 
     /**
@@ -243,4 +248,15 @@ contract DigitalTwinSharesV1 is
      *   to add new variables.
      */
     uint256[50] private __gap;
-}
+/**
+     * @notice Allows subject owners to withdraw their accumulated fees
+     */
+    function withdrawFees() public nonReentrant {
+        uint256 amount = claimableFees[msg.sender];
+        require(amount > 0, "No fees to withdraw");
+
+        claimableFees[msg.sender] = 0;
+
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "Withdrawal failed");
+    }
