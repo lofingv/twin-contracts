@@ -365,13 +365,15 @@ contract ComprehensiveDigitalTwinTests is Test {
         uint256 subjectFee = basePrice * 0.01 ether / 1 ether;
 
         uint256 feeDestBalanceBefore = feeDestination.balance;
-        uint256 ownerBalanceBefore = user1.balance;
+        
+        // We check claimableFees instead of direct balance
+        uint256 claimableBefore = proxy.claimableFees(user1);
 
         vm.prank(user2);
         proxy.buyShares{value: buyCost}(TWIN_ID_1, 5);
 
         assertEq(feeDestination.balance, feeDestBalanceBefore + protocolFee);
-        assertEq(user1.balance, ownerBalanceBefore + subjectFee);
+        assertEq(proxy.claimableFees(user1), claimableBefore + subjectFee);
     }
 
     function testBuySharesEmitsTradeEvent() public {
@@ -477,13 +479,13 @@ contract ComprehensiveDigitalTwinTests is Test {
         uint256 subjectFee = basePrice * 0.01 ether / 1 ether;
 
         uint256 feeDestBalanceBefore = feeDestination.balance;
-        uint256 ownerBalanceBefore = user1.balance;
+        uint256 claimableBefore = proxy.claimableFees(user1);
 
         vm.prank(user2);
         proxy.sellShares(TWIN_ID_1, 5, 0);
 
         assertEq(feeDestination.balance, feeDestBalanceBefore + protocolFee);
-        assertEq(user1.balance, ownerBalanceBefore + subjectFee);
+        assertEq(proxy.claimableFees(user1), claimableBefore + subjectFee);
     }
 
     function testSellSharesEmitsTradeEvent() public {
@@ -668,7 +670,7 @@ contract ComprehensiveDigitalTwinTests is Test {
         proxy.createDigitalTwin{value: cost}(TWIN_ID_1, "https://twin.com");
     }
 
-    function testRevertingTwinOwnerBlocksBuying() public {
+    function testRevertingTwinOwnerDoesNotBlockBuying() public {
         RevertingContract reverter = new RevertingContract();
 
         vm.startPrank(admin);
@@ -679,15 +681,20 @@ contract ComprehensiveDigitalTwinTests is Test {
         vm.startPrank(user1);
         proxy.createDigitalTwin{value: cost}(TWIN_ID_1, "https://twin.com");
         vm.stopPrank();
+
         // Transfer ownership to reverting contract
         vm.startPrank(admin);
         proxy.claimOwnership(TWIN_ID_1, address(reverter));
         vm.stopPrank();
 
-        // Now buying is blocked
+        // NOW BUYING IS NOT BLOCKED - This is what your fix achieved!
         vm.prank(user2);
-        vm.expectRevert("Unable to send funds");
-        proxy.buyShares{value: 1 ether}(TWIN_ID_1, 3);
+        proxy.buyShares{value: 1 ether}(TWIN_ID_1, 3); 
+        
+        // Verify that the purchase was successful
+        assertEq(proxy.sharesBalance(TWIN_ID_1, user2), 3);
+        // Verify that fees are safely stored in claimableFees
+        assertGt(proxy.claimableFees(address(reverter)), 0);
     }
 
     function testRevertingRecipientBlocksSelling() public {
@@ -1055,10 +1062,25 @@ contract RevertingContract {
     }
 }
 
+function testWithdrawFees() public {
+        uint256 cost = proxy.getBuyPriceAfterFee(TWIN_ID_1, 2);
+        vm.prank(user1);
+        proxy.createDigitalTwin{value: cost}(TWIN_ID_1, "https://twin.com");
+        
+        uint256 claimable = proxy.claimableFees(user1);
+        uint256 balanceBefore = user1.balance;
+
+        vm.prank(user1);
+        proxy.withdrawFees();
+
+        assertEq(user1.balance, balanceBefore + claimable, "Full amount should be withdrawn");
+        assertEq(proxy.claimableFees(user1), 0, "Claimable balance should be reset to zero");
+    }
+}
+
 contract NoReceiveContract {}
 
 contract NonUUPSContract {
-    // A regular contract without UUPS upgrade functionality
     function someFunction() public pure returns (uint256) {
         return 42;
     }
